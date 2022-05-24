@@ -1,0 +1,12 @@
+#searchBoxSettings-container {
+  padding-top: 1em;
+  padding-bottom: 1em;
+}
+
+#searchBoxSettings-container .searchBoxSettings-title {
+  font-weight: bold;
+}
+
+#searchBoxSettings-container .searchBoxSettings-textfield input {
+  text-align: center;
+}

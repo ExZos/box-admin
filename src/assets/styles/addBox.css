@@ -1,0 +1,12 @@
+#addBox-container {
+  padding-top: 1em;
+  padding-bottom: 1em;
+}
+
+#addBox-container .addBox-title {
+  font-weight: bold;
+}
+
+#addBox-container .addBox-textfield input {
+  text-align: center;
+}

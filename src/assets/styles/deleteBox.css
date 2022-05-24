@@ -1,0 +1,18 @@
+#deleteBox-container {
+  padding-top: 1em;
+  padding-bottom: 1em;
+}
+
+#deleteBox-container .deleteBox-title {
+  font-weight: bold;
+}
+
+#deleteBox-container .deleteBox-title .boxName {
+  margin-left: 0.5em;
+  font-style: italic;
+  text-decoration: underline;
+}
+
+#deleteBox-container .deleteBox-textfield input {
+  text-align: center;
+}

@@ -1,0 +1,15 @@
+#boxSearch-container {
+  margin-top: 1em;
+}
+
+#boxSearch-container .boxSearch-textfield input {
+  text-align: center;
+}
+
+#boxSearch-container .boxSearch-startAdornment {
+  cursor: pointer;
+}
+
+#boxList-container .boxHeader {
+  text-align: center;
+}

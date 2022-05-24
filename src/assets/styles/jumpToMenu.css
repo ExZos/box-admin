@@ -1,0 +1,16 @@
+#jumpToMenu-container .MuiMenuItem-root {
+  cursor: default;
+  background-color: unset !important;
+}
+
+#jumpToMenu-container .MuiMenuItem-root:hover {
+  background-color: unset;
+}
+
+#jumpToMenu-container .jumpToMenu-table td {
+  border-bottom: 0;
+}
+
+#jumpToMenu-container .jumpToMenu-textfield input {
+  text-align: center;
+}
