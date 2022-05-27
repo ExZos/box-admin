@@ -1,3 +1,4 @@
+import {useNavigate} from 'react-router-dom';
 import {Drawer, Grid, Button} from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -6,10 +7,13 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import '../assets/styles/boxSummary.css';
 
 function BoxSummary(props) {
+  const navigate = useNavigate();
+
   const box = props.box;
   const open = props.open;
   const setOpen = props.setOpen;
   const loading = props.loading;
+  const detailsPath = props.detailsPath;
 
   return (
     <Drawer open={open} anchor="bottom"
@@ -36,7 +40,8 @@ function BoxSummary(props) {
           </Grid>
 
           <Grid item>
-            <Button size="small" variant="contained" disabled={loading}>
+            <Button size="small" variant="contained" disabled={loading}
+              onClick={() => navigate(detailsPath)} >
               <OpenInNewIcon />
             </Button>
           </Grid>

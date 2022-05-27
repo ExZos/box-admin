@@ -1,3 +1,4 @@
+import {useNavigate} from 'react-router-dom';
 import {Menu, MenuItem, ListItemIcon} from '@mui/material';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import EditIcon from '@mui/icons-material/Edit';
@@ -6,10 +7,13 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import '../assets/styles/jumpToMenu.css';
 
 function BoxMenu(props) {
+  const navigate = useNavigate();
+
   const anchor = props.anchor;
   const setAnchor = props.setAnchor;
   const getAnchorCursorPos = props.getAnchorCursorPos;
   const onMenuItemClick = props.onMenuItemClick;
+  const detailsPath = props.detailsPath;
   const editDrawerNum = props.editDrawerNum;
   const deleteDrawerNum = props.deleteDrawerNum;
 
@@ -17,7 +21,7 @@ function BoxMenu(props) {
     <Menu open={Boolean(anchor)} anchorReference="anchorPosition"
       anchorPosition={getAnchorCursorPos(anchor)}
       onClose={() => setAnchor(null)}>
-      <MenuItem>
+      <MenuItem onClick={() => navigate(detailsPath)}>
         <ListItemIcon>
           <OpenInNewIcon fontSize="small" />
         </ListItemIcon>

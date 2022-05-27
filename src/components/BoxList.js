@@ -1,4 +1,5 @@
 import {useEffect, useState, Fragment} from 'react';
+import {useLocation, useSearchParams} from 'react-router-dom';
 import {Grid, CircularProgress, Card, CardActionArea, CardHeader, Snackbar,
   Alert, TextField, InputAdornment, Badge, Pagination} from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -17,6 +18,9 @@ import BoxMenu from './BoxMenu';
 import JumpToMenu from './JumpToMenu';
 
 function BoxList() {
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams(location.search);
+
   const [boxes, setBoxes] = useState([]);
   const [activeBox, setActiveBox] = useState(null);
   const [openDrawer, setOpenDrawer] = useState(false);
@@ -30,7 +34,7 @@ function BoxList() {
   const [page, setPage] = useState(1);
 
   // Search
-  const [searchVal, setSearchVal] = useState('');
+  const [searchVal, setSearchVal] = useState(searchParams.get('search') ? searchParams.get('search') : '');
   const [filterByName, setFilterByName] = useState(true);
   const [filterByType, setFilterByType] = useState(false);
   const [sortBy, setSortBy] = useState('name');
@@ -129,11 +133,13 @@ function BoxList() {
 
   return (
     <Fragment>
-      <Grid container direction="column" spacing={5} justifyContent="center" alignItems="center">
+      <Grid id="app-container" container direction="column" spacing={5} justifyContent="center" alignItems="center">
         <Grid item id="boxSearch-container">
           <TextField id="boxSearch" className="boxSearch-textfield"
             size="small" value={searchVal} onChange={(e) => {
               setSearchVal(e.target.value);
+              if(e.target.value) setSearchParams({search: e.target.value});
+              else setSearchParams({});
               setPage(1);
             }}
             InputProps={{
@@ -160,7 +166,10 @@ function BoxList() {
                 <SearchOffIcon fontSize="large" />
               </Grid>
 
-              <Grid item onClick={() => setSearchVal('')}>
+              <Grid item onClick={() => {
+                setSearchVal('');
+                setSearchParams({});
+              }}>
                 Clear
               </Grid>
 
@@ -212,7 +221,8 @@ function BoxList() {
       </Snackbar>
 
       <BoxSummary box={activeBox} open={openDrawer === 1} setOpen={setOpenDrawer}
-        loading={sendingRequest} />
+        loading={sendingRequest}
+        editDrawerNum={3} deleteDrawerNum={4} detailsPath={'/details/' + activeBox?._id} />
 
       <AddBox open={openDrawer === 2} setOpen={setOpenDrawer}
         loading={sendingRequest} setLoading={setSendingRequest}
@@ -236,13 +246,11 @@ function BoxList() {
         page={page} setPage={setPage} pageCount={Math.ceil(boxesCount / pageSize)} />
 
       <SearchMenu anchor={searchMenuAnchor} setAnchor={setSearchMenuAnchor}
-        onMenuItemClick={onMenuItemClick}
-        settingsDrawerNum={5} addDrawerNum={2} />
+        onMenuItemClick={onMenuItemClick} settingsDrawerNum={5} addDrawerNum={2} />
 
       <BoxMenu anchor={boxMenuAnchor} setAnchor={setBoxMenuAnchor}
-        getAnchorCursorPos={getAnchorCursorPos}
-        onMenuItemClick={onMenuItemClick}
-        editDrawerNum={3} deleteDrawerNum={4} />
+        getAnchorCursorPos={getAnchorCursorPos} onMenuItemClick={onMenuItemClick}
+        detailsPath={'/details/' + activeBox?._id} editDrawerNum={3} deleteDrawerNum={4} />
 
       <JumpToMenu anchor={jumpToMenuAnchor} setAnchor={setJumpToMenuAnchor}
         getAnchorCursorPos={getAnchorCursorPos}
