@@ -5,13 +5,13 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 import '../assets/styles/jumpToMenu.css';
+import {getCursorPos} from '../utils/helper.utils';
 
 function BoxMenu(props) {
   const navigate = useNavigate();
 
   const anchor = props.anchor;
   const setAnchor = props.setAnchor;
-  const getAnchorCursorPos = props.getAnchorCursorPos;
   const onMenuItemClick = props.onMenuItemClick;
   const detailsPath = props.detailsPath;
   const editDrawerNum = props.editDrawerNum;
@@ -19,7 +19,7 @@ function BoxMenu(props) {
 
   return (
     <Menu open={Boolean(anchor)} anchorReference="anchorPosition"
-      anchorPosition={getAnchorCursorPos(anchor)}
+      anchorPosition={getCursorPos(anchor)}
       onClose={() => setAnchor(null)}>
       <MenuItem onClick={() => navigate(detailsPath)}>
         <ListItemIcon>

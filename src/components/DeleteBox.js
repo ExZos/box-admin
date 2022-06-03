@@ -12,6 +12,8 @@ function DeleteBox(props) {
   const loading = props.loading;
   const setLoading = props.setLoading;
   const showFeedback = props.showFeedback;
+  const setPage = props.setPage;
+  const setURLParams = props.setURLParams;
 
   const [name, setName] = useState('');
 
@@ -41,6 +43,8 @@ function DeleteBox(props) {
 
     setLoading(false);
     setOpen(false);
+    setPage(1);
+    setURLParams({page: 1});
   };
 
   const renderDeleteButton = () => {

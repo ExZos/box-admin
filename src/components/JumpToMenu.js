@@ -4,14 +4,15 @@ import {Menu, Table, TableBody, TableRow,
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
 import '../assets/styles/jumpToMenu.css';
+import {getCursorPos} from '../utils/helper.utils';
 
 function JumpToMenu(props) {
   const anchor = props.anchor;
   const setAnchor = props.setAnchor;
-  const getAnchorCursorPos = props.getAnchorCursorPos;
   const page = props.page;
   const setPage = props.setPage;
   const pageCount = props.pageCount;
+  const setURLParams = props.setURLParams;
 
   const [newPage, setNewPage] = useState(1);
 
@@ -22,7 +23,7 @@ function JumpToMenu(props) {
   return (
     <Menu id="jumpToMenu-container"
       open={Boolean(anchor)} anchorReference="anchorPosition"
-      anchorPosition={getAnchorCursorPos(anchor)} onClose={() => setAnchor(null)}>
+      anchorPosition={getCursorPos(anchor)} onClose={() => setAnchor(null)}>
       <Table className="jumpToMenu-table" size="small">
         <TableBody>
           <TableRow>
@@ -50,6 +51,7 @@ function JumpToMenu(props) {
                   if(page === val) setNewPage(val);
                   setPage(val);
                   setAnchor(null);
+                  setURLParams({page: val});
                 }}>
                 <ArrowForwardIosIcon />
               </Button>

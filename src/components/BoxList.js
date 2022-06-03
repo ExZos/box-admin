@@ -1,4 +1,4 @@
-import {useEffect, useState, Fragment} from 'react';
+import {useEffect, useState, useMemo, Fragment} from 'react';
 import {useLocation, useSearchParams} from 'react-router-dom';
 import {Grid, CircularProgress, Card, CardActionArea, CardHeader, Snackbar,
   Alert, TextField, InputAdornment, Badge, Pagination} from '@mui/material';
@@ -8,6 +8,7 @@ import SearchOffIcon from '@mui/icons-material/SearchOff';
 
 import '../assets/styles/boxList.css';
 import {server, api} from '../endpoints/server';
+import {setCursorPos} from '../utils/helper.utils';
 import BoxSummary from './BoxSummary';
 import AddBox from './AddBox';
 import EditBox from './EditBox';
@@ -30,15 +31,20 @@ function BoxList() {
 
   // Pagination
   const [boxesCount, setBoxesCount] = useState(null);
-  const [pageSize, setPageSize] = useState(2);
-  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(searchParams.get('pageSize') ? searchParams.get('pageSize') : 2);
+  const [page, setPage] = useState(searchParams.get('page') ? parseInt(searchParams.get('page')) : 1);
+  const pageCount = useMemo(() =>
+    Math.ceil(boxesCount / pageSize)
+  , [boxesCount, pageSize]);
 
   // Search
   const [searchVal, setSearchVal] = useState(searchParams.get('search') ? searchParams.get('search') : '');
-  const [filterByName, setFilterByName] = useState(true);
-  const [filterByType, setFilterByType] = useState(false);
-  const [sortBy, setSortBy] = useState('name');
-  const [sortOrder, setSortOrder] = useState(1);
+  const [filterBy, setFilterBy] = useState(searchParams.get('filterBy') ? searchParams.get('filterBy') : {
+    name: true,
+    type: false
+  }); // TODO: properly initialize from search params
+  const [sortBy, setSortBy] = useState(searchParams.get('sortBy') ? searchParams.get('sortBy') : 'name');
+  const [sortOrder, setSortOrder] = useState(searchParams.get('sortOrder') ? searchParams.get('sortOrder') : 1);
 
   // Request
   const [sendingRequest, setSendingRequest] = useState(false);
@@ -49,8 +55,8 @@ function BoxList() {
       try {
         const queryParams = new URLSearchParams();
 
-        if(filterByName) queryParams.append('name', searchVal);
-        if(filterByType) queryParams.append('type', searchVal);
+        if(filterBy.name) queryParams.append('name', searchVal);
+        if(filterBy.type) queryParams.append('type', searchVal);
 
         queryParams.append('sortBy', sortBy);
         queryParams.append('sortOrder', sortOrder);
@@ -72,17 +78,12 @@ function BoxList() {
     };
 
     getBoxes();
-  }, [sendingRequest, searchVal, filterByName,
-    filterByType, sortBy, sortOrder, pageSize, page]);
+  }, [sendingRequest, searchVal, filterBy, sortBy, sortOrder, pageSize, page]);
 
   useEffect(() => {
-    if(searchVal && (!filterByName && !filterByType))
+    if(searchVal && (!filterBy.name && !filterBy.type))
       showRequestFeedback('warning', 'No search filters are applied');
-  }, [searchVal, filterByName, filterByType]);
-
-  useEffect(() => {
-    setPage(1);
-  }, [pageSize]);
+  }, [searchVal, filterBy]);
 
   const onMenuItemClick = (drawerNumb, setMenuAnchor) => {
     setOpenDrawer(drawerNumb);
@@ -108,28 +109,75 @@ function BoxList() {
     });
   };
 
-  const setAnchorToCursor = (e, setAnchor) => {
-    setAnchor({
-      mouseX: e.clientX,
-      mouseY: e.clientY,
-    });
+  const setURLParams = (params) => {
+    for(const [k, v] of Object.entries(params)) {
+      if(v) searchParams.set(k, v);
+      else searchParams.delete(k);
+    }
+
+    setSearchParams(searchParams);
   };
 
-  const getAnchorCursorPos = (anchor) => {
-    if(!anchor) return;
+  const renderBoxes = () => {
+    if(!boxes || sendingRequest) return <Grid item><CircularProgress /></Grid>;
 
-    return { top: anchor.mouseY, left: anchor.mouseX };
-  };
+    if(boxesCount === 0) {
+      return (
+        <Fragment>
+          <Grid item>
+            <SearchOffIcon fontSize="large" />
+          </Grid>
 
-  if(!boxes) {
+          <Grid item onClick={() => {
+            setSearchVal('');
+            setSearchParams({});
+          }}>
+            Clear
+          </Grid>
+
+          <Grid item onClick={() => setOpenDrawer(2)}>
+            Add
+          </Grid>
+        </Fragment>
+      );
+    }
+
     return (
-      <Grid id="loading-container" container direction="column" justifyContent="center" alignItems="center">
-        <Grid item>
-          <CircularProgress />
+      <Fragment>
+        <Grid id="boxList-container" container item direction="row" spacing={3} justifyContent="center" alignItems="center">
+          {boxes.map((b) =>
+            <Grid item key={b._id} onClick={() => {
+              setActiveBox(b);
+              setOpenDrawer(1);
+            }} onContextMenu={(e) => {
+              setActiveBox(b);
+              setCursorPos(e, setBoxMenuAnchor);
+              e.preventDefault();
+            }}>
+              <Card>
+                <CardActionArea>
+                  <CardHeader title={b.name} subheader={b.type}
+                    className="boxHeader" />
+                </CardActionArea>
+              </Card>
+            </Grid>
+          )}
         </Grid>
-      </Grid>
+
+        <Grid item>
+          <Pagination count={pageCount}
+            page={page} onChange={(e, page) => {
+              setPage(page);
+              setURLParams({page: page});
+            }}
+            boundaryCount={3} onContextMenu={(e) => {
+              setCursorPos(e, setJumpToMenuAnchor);
+              e.preventDefault();
+            }} />
+        </Grid>
+      </Fragment>
     );
-  }
+  };
 
   return (
     <Fragment>
@@ -138,9 +186,11 @@ function BoxList() {
           <TextField id="boxSearch" className="boxSearch-textfield"
             size="small" value={searchVal} onChange={(e) => {
               setSearchVal(e.target.value);
-              if(e.target.value) setSearchParams({search: e.target.value});
-              else setSearchParams({});
               setPage(1);
+              setURLParams({
+                search: e.target.value,
+                page: 1
+              });
             }}
             InputProps={{
               startAdornment: (
@@ -160,55 +210,7 @@ function BoxList() {
         </Grid>
 
         <Grid container item direction="column" spacing={5} justifyContent="center" alignItems="center">
-          {boxesCount === 0 ?
-            <Fragment>
-              <Grid item>
-                <SearchOffIcon fontSize="large" />
-              </Grid>
-
-              <Grid item onClick={() => {
-                setSearchVal('');
-                setSearchParams({});
-              }}>
-                Clear
-              </Grid>
-
-              <Grid item onClick={() => setOpenDrawer(2)}>
-                Add
-              </Grid>
-            </Fragment>
-            :
-            <Fragment>
-              <Grid id="boxList-container" container item direction="row" spacing={3} justifyContent="center" alignItems="center">
-                {boxes.map((b) =>
-                  <Grid item key={b._id} onClick={() => {
-                    setActiveBox(b);
-                    setOpenDrawer(1);
-                  }} onContextMenu={(e) => {
-                    setActiveBox(b);
-                    setAnchorToCursor(e, setBoxMenuAnchor);
-                    e.preventDefault();
-                  }}>
-                    <Card>
-                      <CardActionArea>
-                        <CardHeader title={b.name} subheader={b.type}
-                          className="boxHeader" />
-                      </CardActionArea>
-                    </Card>
-                  </Grid>
-                )}
-              </Grid>
-
-              <Grid item>
-                <Pagination count={Math.ceil(boxesCount / pageSize)}
-                  page={page} onChange={(e, page) => setPage(page)}
-                  boundaryCount={3} onContextMenu={(e) => {
-                    setAnchorToCursor(e, setJumpToMenuAnchor);
-                    e.preventDefault();
-                  }} />
-              </Grid>
-            </Fragment>
-          }
+          {renderBoxes()}
         </Grid>
       </Grid>
 
@@ -234,27 +236,28 @@ function BoxList() {
 
       <DeleteBox box={activeBox} open={openDrawer === 4} setOpen={setOpenDrawer}
         loading={sendingRequest} setLoading={setSendingRequest}
-        showFeedback={showRequestFeedback} />
+        showFeedback={showRequestFeedback}
+        setPage={setPage} setURLParams={setURLParams} />
 
       <SearchBoxSettings open={openDrawer === 5} setOpen={setOpenDrawer}
-        filterByName={filterByName} setFilterByName={setFilterByName}
-        filterByType={filterByType} setFilterByType={setFilterByType}
+        filterBy={filterBy} setFilterBy={setFilterBy}
         sortBy={sortBy} setSortBy={setSortBy}
         sortOrder={sortOrder} setSortOrder={setSortOrder}
         pageSize={pageSize} setPageSize={setPageSize}
         defaultPageSize={2} minPageSize={1} maxPageSize={1000}
-        page={page} setPage={setPage} pageCount={Math.ceil(boxesCount / pageSize)} />
+        page={page} setPage={setPage} pageCount={pageCount}
+        setURLParams={setURLParams} />
 
       <SearchMenu anchor={searchMenuAnchor} setAnchor={setSearchMenuAnchor}
         onMenuItemClick={onMenuItemClick} settingsDrawerNum={5} addDrawerNum={2} />
 
       <BoxMenu anchor={boxMenuAnchor} setAnchor={setBoxMenuAnchor}
-        getAnchorCursorPos={getAnchorCursorPos} onMenuItemClick={onMenuItemClick}
+        onMenuItemClick={onMenuItemClick}
         detailsPath={'/details/' + activeBox?._id} editDrawerNum={3} deleteDrawerNum={4} />
 
       <JumpToMenu anchor={jumpToMenuAnchor} setAnchor={setJumpToMenuAnchor}
-        getAnchorCursorPos={getAnchorCursorPos}
-        page={page} setPage={setPage} pageCount={Math.ceil(boxesCount / pageSize)} />
+        page={page} setPage={setPage} pageCount={pageCount}
+        setURLParams={setURLParams} />
     </Fragment>
   );
 }

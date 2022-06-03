@@ -12,10 +12,8 @@ function SearchBoxSettings(props) {
   const setOpen = props.setOpen;
 
   // Filter
-  const filterByName = props.filterByName;
-  const setFilterByName = props.setFilterByName;
-  const filterByType = props.filterByType;
-  const setFilterByType = props.setFilterByType;
+  const filterBy = props.filterBy;
+  const setFilterBy = props.setFilterBy;
 
   // Sort
   const sortBy = props.sortBy;
@@ -34,6 +32,8 @@ function SearchBoxSettings(props) {
   const page = props.page;
   const setPage = props.setPage;
   const pageCount = props.pageCount;
+
+  const setURLParams = props.setURLParams;
 
   const [newPageSize, setNewPageSize] = useState(defaultPageSize);
   const [newPage, setNewPage] = useState(1);
@@ -56,7 +56,10 @@ function SearchBoxSettings(props) {
     return (
       <Tooltip title={title} describeChild followCursor>
         <IconButton variant="contained" color="primary" size="small"
-          onClick={() => setSortOrder(sortOrderChange)}>
+          onClick={() => {
+            setSortOrder(sortOrderChange);
+            setURLParams({sortBy: sortBy, sortOrder: sortOrderChange});
+          }}>
             <Icon />
         </IconButton>
       </Tooltip>
@@ -76,39 +79,64 @@ function SearchBoxSettings(props) {
             <TableBody>
               <TableRow>
                 <TableCell align="right">
-                  Filter by
+                  Search by
                 </TableCell>
 
                 <TableCell>
                   <FormControlLabel label="Name" control={<Checkbox size="small"
-                    checked={filterByName} onChange={(e) => setFilterByName(e.target.checked)} />} />
+                    checked={filterBy.name} onChange={(e) => {
+                      setFilterBy({...filterBy, name: e.target.checked});
+
+                      // TOOD: refactor
+                      const filterByKeys = [];
+                      if(e.target.checked) filterByKeys.push('name');
+                      if(filterBy.type) filterByKeys.push('type');
+                      setURLParams({filterBy: filterByKeys.length === 0 ? null : filterByKeys});
+                    }} />} />
 
                   <FormControlLabel label="Type" control={<Checkbox size="small"
-                    checked={filterByType} onChange={(e) => setFilterByType(e.target.checked)} />} />
+                    checked={filterBy.type} onChange={(e) => {
+                      setFilterBy({...filterBy, type: e.target.checked});
+
+                      const filterByKeys = [];
+                      if(e.target.checked) filterByKeys.push('type');
+                      if(filterBy.name) filterByKeys.push('name');
+                      setURLParams({filterBy: filterByKeys.length === 0 ? null : filterByKeys});
+                    }} />} />
                 </TableCell>
 
                 <TableCell align="center">
                   <FormControlLabel label="All" control={<Checkbox size="small"
-                    checked={filterByName && filterByType}
+                    checked={Boolean(filterBy.name && filterBy.type)}
                     onChange={(e) => {
-                      const value = e.target.checked;
-                      setFilterByName(value);
-                      setFilterByType(value);
+                      if(!e.target.checked) {
+                        setFilterBy({name: false, type: false});
+                        setURLParams({filterBy: null});
+                      } else {
+                        setFilterBy({name: true, type: true});
+                        setURLParams({filterBy: ['name', 'type']})
+                      }
                     }} />} />
                 </TableCell>
               </TableRow>
 
               <TableRow>
                 <TableCell align="right">
-                  Order by
+                  Sort by
                 </TableCell>
 
                 <TableCell>
                   <FormControlLabel label="Name" control={<Radio size="small"
-                    checked={sortBy === 'name'} onChange={() => setSortBy('name')} />} />
+                    checked={sortBy === 'name'} onChange={() => {
+                      setSortBy('name');
+                      setURLParams({sortBy: 'name', sortOrder: sortOrder});
+                    }} />} />
 
                   <FormControlLabel label="Type" control={<Radio size="small"
-                    checked={sortBy === 'type'} onChange={() => setSortBy('type')} />} />
+                    checked={sortBy === 'type'} onChange={() => {
+                      setSortBy('type');
+                      setURLParams({sortBy: 'type', sortOrder: sortOrder});
+                    }} />} />
                 </TableCell>
 
                 <TableCell align="center">
@@ -135,7 +163,11 @@ function SearchBoxSettings(props) {
                 <TableCell align="center">
                   <Button size="small" variant="contained"
                     onClick={() => setNumbValue(newPageSize, minPageSize,
-                        maxPageSize, setPageSize)
+                        maxPageSize, (value) => {
+                          setPageSize(value);
+                          setPage(1);
+                          setURLParams({pageSize: value});
+                        })
                     }>
                     <ArrowForwardIosIcon />
                   </Button>
@@ -160,6 +192,7 @@ function SearchBoxSettings(props) {
                       (value) => {
                         if(page === value) setNewPage(value);
                         setPage(value);
+                        setURLParams({page: value});
                       })
                     }>
                     <ArrowForwardIosIcon />
