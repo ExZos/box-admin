@@ -86,22 +86,30 @@ function SearchBoxSettings(props) {
                   <FormControlLabel label="Name" control={<Checkbox size="small"
                     checked={filterBy.name} onChange={(e) => {
                       setFilterBy({...filterBy, name: e.target.checked});
+                      setPage(1);
 
-                      // TOOD: refactor
+                      // TODO: refactor
                       const filterByKeys = [];
                       if(e.target.checked) filterByKeys.push('name');
                       if(filterBy.type) filterByKeys.push('type');
-                      setURLParams({filterBy: filterByKeys.length === 0 ? null : filterByKeys});
+                      setURLParams({
+                        filterBy: filterByKeys.length === 0 ? null : filterByKeys,
+                        page: 1
+                      });
                     }} />} />
 
                   <FormControlLabel label="Type" control={<Checkbox size="small"
                     checked={filterBy.type} onChange={(e) => {
                       setFilterBy({...filterBy, type: e.target.checked});
+                      setPage(1);
 
                       const filterByKeys = [];
                       if(e.target.checked) filterByKeys.push('type');
                       if(filterBy.name) filterByKeys.push('name');
-                      setURLParams({filterBy: filterByKeys.length === 0 ? null : filterByKeys});
+                      setURLParams({
+                        filterBy: filterByKeys.length === 0 ? null : filterByKeys,
+                        page: 1
+                      });
                     }} />} />
                 </TableCell>
 
@@ -111,10 +119,12 @@ function SearchBoxSettings(props) {
                     onChange={(e) => {
                       if(!e.target.checked) {
                         setFilterBy({name: false, type: false});
-                        setURLParams({filterBy: null});
+                        setPage(1);
+                        setURLParams({filterBy: null, page: 1});
                       } else {
                         setFilterBy({name: true, type: true});
-                        setURLParams({filterBy: ['name', 'type']})
+                        setPage(1);
+                        setURLParams({filterBy: ['name', 'type'], page: 1})
                       }
                     }} />} />
                 </TableCell>

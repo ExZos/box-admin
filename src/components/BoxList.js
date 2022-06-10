@@ -31,20 +31,24 @@ function BoxList() {
 
   // Pagination
   const [boxesCount, setBoxesCount] = useState(null);
-  const [pageSize, setPageSize] = useState(searchParams.get('pageSize') ? searchParams.get('pageSize') : 2);
-  const [page, setPage] = useState(searchParams.get('page') ? parseInt(searchParams.get('page')) : 1);
+  const [pageSize, setPageSize] = useState(searchParams.get('pageSize') ?
+    searchParams.get('pageSize') : 2);
+  const [page, setPage] = useState(searchParams.get('page') ?
+    parseInt(searchParams.get('page')) : 1);
   const pageCount = useMemo(() =>
     Math.ceil(boxesCount / pageSize)
   , [boxesCount, pageSize]);
 
   // Search
-  const [searchVal, setSearchVal] = useState(searchParams.get('search') ? searchParams.get('search') : '');
-  const [filterBy, setFilterBy] = useState(searchParams.get('filterBy') ? searchParams.get('filterBy') : {
-    name: true,
-    type: false
-  }); // TODO: properly initialize from search params
-  const [sortBy, setSortBy] = useState(searchParams.get('sortBy') ? searchParams.get('sortBy') : 'name');
-  const [sortOrder, setSortOrder] = useState(searchParams.get('sortOrder') ? searchParams.get('sortOrder') : 1);
+  const [searchVal, setSearchVal] = useState(searchParams.get('search') ?
+    searchParams.get('search') : '');
+  const [filterBy, setFilterBy] = useState(searchParams.get('filterBy') ?
+      searchParams.get('filterBy').split(',').reduce((dict, el) =>
+        ((dict[el] = true, dict)), {}) : {name: true, type: false});
+  const [sortBy, setSortBy] = useState(searchParams.get('sortBy') ?
+    searchParams.get('sortBy') : 'name');
+  const [sortOrder, setSortOrder] = useState(searchParams.get('sortOrder') ?
+    searchParams.get('sortOrder') : 1);
 
   // Request
   const [sendingRequest, setSendingRequest] = useState(false);
