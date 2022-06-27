@@ -8,7 +8,7 @@ import SearchOffIcon from '@mui/icons-material/SearchOff';
 
 import '../assets/styles/boxList.css';
 import {server, api} from '../endpoints/server';
-import {setCursorPos} from '../utils/helper.utils';
+import {getNumbValue, getEnumValue, setCursorPos} from '../utils/helper.utils';
 import BoxSummary from './BoxSummary';
 import AddBox from './AddBox';
 import EditBox from './EditBox';
@@ -31,24 +31,17 @@ function BoxList() {
 
   // Pagination
   const [boxesCount, setBoxesCount] = useState(null);
-  const [pageSize, setPageSize] = useState(searchParams.get('pageSize') ?
-    searchParams.get('pageSize') : 2);
-  const [page, setPage] = useState(searchParams.get('page') ?
-    parseInt(searchParams.get('page')) : 1);
-  const pageCount = useMemo(() =>
-    Math.ceil(boxesCount / pageSize)
-  , [boxesCount, pageSize]);
+  const [pageSize, setPageSize] = useState(() => getNumbValue(searchParams.get('pageSize'), 2, 1, 1000));
+  const [page, setPage] = useState(() => getNumbValue(searchParams.get('page'), 1, 1)); // TODO: get max value
+  const pageCount = useMemo(() => Math.ceil(boxesCount / pageSize), [boxesCount, pageSize]);
 
   // Search
-  const [searchVal, setSearchVal] = useState(searchParams.get('search') ?
-    searchParams.get('search') : '');
+  const [searchVal, setSearchVal] = useState(searchParams.get('search') ? searchParams.get('search') : '');
   const [filterBy, setFilterBy] = useState(searchParams.get('filterBy') ?
       searchParams.get('filterBy').split(',').reduce((dict, el) =>
         ((dict[el] = true, dict)), {}) : {name: true, type: false});
-  const [sortBy, setSortBy] = useState(searchParams.get('sortBy') ?
-    searchParams.get('sortBy') : 'name');
-  const [sortOrder, setSortOrder] = useState(searchParams.get('sortOrder') ?
-    searchParams.get('sortOrder') : 1);
+  const [sortBy, setSortBy] = useState(searchParams.get('sortBy') ? searchParams.get('sortBy') : 'name');
+  const [sortOrder, setSortOrder] = useState(getEnumValue(searchParams.get('sortOrder'), '1', ['1', '-1']));
 
   // Request
   const [sendingRequest, setSendingRequest] = useState(false);
