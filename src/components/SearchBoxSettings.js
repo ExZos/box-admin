@@ -175,7 +175,6 @@ function SearchBoxSettings(props) {
                     onClick={() => setNumbValue(newPageSize, minPageSize,
                         maxPageSize, (value) => {
                           setPageSize(value);
-                          setPage(1);
                           setURLParams({pageSize: value});
                         })
                     }>

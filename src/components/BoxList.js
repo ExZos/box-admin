@@ -32,7 +32,7 @@ function BoxList() {
   // Pagination
   const [boxesCount, setBoxesCount] = useState(null);
   const [pageSize, setPageSize] = useState(() => getNumbValue(searchParams.get('pageSize'), 2, 1, 1000));
-  const [page, setPage] = useState(() => getNumbValue(searchParams.get('page'), 1, 1)); // TODO: get max value
+  const [page, setPage] = useState(() => getNumbValue(searchParams.get('page'), 1, 1));
   const pageCount = useMemo(() => Math.ceil(boxesCount / pageSize), [boxesCount, pageSize]);
 
   // Search
@@ -68,7 +68,7 @@ function BoxList() {
         const res = await server.get(api.box.list, config);
         setBoxes(res.data.boxes);
         setBoxesCount(res.data.count);
-        console.log('getBoxes: ', res.data);
+        // console.log('getBoxes: ', res.data);
       } catch(err) {
         console.error(err);
       }
@@ -81,6 +81,16 @@ function BoxList() {
     if(searchVal && (!filterBy.name && !filterBy.type))
       showRequestFeedback('warning', 'No search filters are applied');
   }, [searchVal, filterBy]);
+
+  // Validates the page number
+  useEffect(() => {
+    console.log('Validate page');
+    if(!pageCount) return;
+    else if(page < 0) setPage(1);
+    else if(page > pageCount) setPage(pageCount);
+  }, [page, pageCount]);
+
+  // TODO: think about creating useEffects to handle state value validation globally
 
   const onMenuItemClick = (drawerNumb, setMenuAnchor) => {
     setOpenDrawer(drawerNumb);
@@ -233,8 +243,8 @@ function BoxList() {
 
       <DeleteBox box={activeBox} open={openDrawer === 4} setOpen={setOpenDrawer}
         loading={sendingRequest} setLoading={setSendingRequest}
-        showFeedback={showRequestFeedback}
-        setPage={setPage} setURLParams={setURLParams} />
+        showFeedback={showRequestFeedback} 
+        setURLParams={setURLParams} />
 
       <SearchBoxSettings open={openDrawer === 5} setOpen={setOpenDrawer}
         filterBy={filterBy} setFilterBy={setFilterBy}
