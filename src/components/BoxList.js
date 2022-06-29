@@ -41,7 +41,7 @@ function BoxList() {
       searchParams.get('filterBy').split(',').reduce((dict, el) =>
         ((dict[el] = true, dict)), {}) : {name: true, type: false});
   const [sortBy, setSortBy] = useState(searchParams.get('sortBy') ? searchParams.get('sortBy') : 'name');
-  const [sortOrder, setSortOrder] = useState(getEnumValue(searchParams.get('sortOrder'), '1', ['1', '-1']));
+  const [sortOrder, setSortOrder] = useState(parseInt(getEnumValue(searchParams.get('sortOrder'), '1', ['1', '-1'])));
 
   // Request
   const [sendingRequest, setSendingRequest] = useState(false);
@@ -68,7 +68,7 @@ function BoxList() {
         const res = await server.get(api.box.list, config);
         setBoxes(res.data.boxes);
         setBoxesCount(res.data.count);
-        // console.log('getBoxes: ', res.data);
+        console.log('getBoxes: ', res.data)
       } catch(err) {
         console.error(err);
       }
@@ -84,9 +84,8 @@ function BoxList() {
 
   // Validates the page number
   useEffect(() => {
-    console.log('Validate page');
     if(!pageCount) return;
-    else if(page < 0) setPage(1);
+    else if(!page || page < 0) setPage(1);
     else if(page > pageCount) setPage(pageCount);
   }, [page, pageCount]);
 
@@ -163,8 +162,7 @@ function BoxList() {
             }}>
               <Card>
                 <CardActionArea>
-                  <CardHeader title={b.name} subheader={b.type}
-                    className="boxHeader" />
+                  <CardHeader title={b.name} subheader={b.type} className="boxHeader" />
                 </CardActionArea>
               </Card>
             </Grid>
@@ -229,8 +227,7 @@ function BoxList() {
         </Alert>
       </Snackbar>
 
-      <BoxSummary box={activeBox} open={openDrawer === 1} setOpen={setOpenDrawer}
-        loading={sendingRequest}
+      <BoxSummary box={activeBox} open={openDrawer === 1} setOpen={setOpenDrawer} loading={sendingRequest}
         editDrawerNum={3} deleteDrawerNum={4} detailsPath={'/details/' + activeBox?._id} />
 
       <AddBox open={openDrawer === 2} setOpen={setOpenDrawer}
@@ -258,8 +255,7 @@ function BoxList() {
       <SearchMenu anchor={searchMenuAnchor} setAnchor={setSearchMenuAnchor}
         onMenuItemClick={onMenuItemClick} settingsDrawerNum={5} addDrawerNum={2} />
 
-      <BoxMenu anchor={boxMenuAnchor} setAnchor={setBoxMenuAnchor}
-        onMenuItemClick={onMenuItemClick}
+      <BoxMenu anchor={boxMenuAnchor} setAnchor={setBoxMenuAnchor} onMenuItemClick={onMenuItemClick}
         detailsPath={'/details/' + activeBox?._id} editDrawerNum={3} deleteDrawerNum={4} />
 
       <JumpToMenu anchor={jumpToMenuAnchor} setAnchor={setJumpToMenuAnchor}
