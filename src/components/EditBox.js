@@ -91,13 +91,13 @@ function EditBox(props) {
         <Grid container item direction="row" spacing={2} justifyContent="center" alignItems="center">
           <Grid item>
             <TextField className="editBox-textfield" placeholder="name" size="small"
-              value={name} onChange={(e) => setName(e.target.value)}
+              value={name ? name : ''} onChange={(e) => setName(e.target.value)}
               disabled={loading} />
           </Grid>
 
           <Grid item>
             <TextField className="editBox-textfield" placeholder="type" size="small"
-              value={type} onChange={(e) => setType(e.target.value)}
+              value={type ? type : ''} onChange={(e) => setType(e.target.value)}
               disabled={loading} />
           </Grid>
 

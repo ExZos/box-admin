@@ -89,6 +89,11 @@ function BoxList() {
     else if(page > pageCount) setPage(pageCount);
   }, [page, pageCount]);
 
+  // Unsets the active box on drawer/menu close
+  useEffect(() => {
+    if(!openDrawer && !boxMenuAnchor) setActiveBox(null);
+  }, [openDrawer, boxMenuAnchor]);
+
   // TODO: think about creating useEffects to handle state value validation globally
 
   const onMenuItemClick = (drawerNumb, setMenuAnchor) => {
@@ -160,7 +165,7 @@ function BoxList() {
               setCursorPos(e, setBoxMenuAnchor);
               e.preventDefault();
             }}>
-              <Card>
+              <Card className={'boxCard-container' +  (b?._id === activeBox?._id ? ' boxCard-active' : '')}>
                 <CardActionArea>
                   <CardHeader title={b.name} subheader={b.type} className="boxHeader" />
                 </CardActionArea>
@@ -191,7 +196,6 @@ function BoxList() {
           <TextField id="boxSearch" className="boxSearch-textfield"
             size="small" value={searchVal} onChange={(e) => {
               setSearchVal(e.target.value);
-              setPage(1);
               setURLParams({
                 search: e.target.value,
                 page: 1

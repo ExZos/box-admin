@@ -13,3 +13,7 @@
 #boxList-container .boxHeader {
   text-align: center;
 }
+
+#boxList-container .boxCard-container.boxCard-active {
+  background-color: rgba(0, 0, 0, 0.1);
+}
